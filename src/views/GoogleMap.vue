@@ -35,9 +35,9 @@ export default defineComponent({
 
     let { google } = window;
     let map: google.maps.Map;
-    let geocoder: google.maps.Geocoder;
+    let panorama: google.maps.StreetViewPanorama;
+    let streetViewElement: HTMLElement | null;
     const markers: google.maps.Marker[] = [];
-    let input: HTMLInputElement | undefined;
 
     const setMapOnAll = (currentMap: google.maps.Map | null) => {
       for (let i = 0; i < markers.length; i++) {
@@ -50,68 +50,57 @@ export default defineComponent({
       setMapOnAll(null);
     };
 
-    const getGeocode = (latLng: google.maps.LatLng) => {
-      geocoder.geocode({
-        location: latLng,
-      }, (results, status) => {
-        if (status === google.maps.GeocoderStatus.OK) {
-          if (results && results[0]) {
-            const components = results[0];
-            if (input) {
-              input.value = components.formatted_address;
-            }
+    const centerMap = (latLng: google.maps.LatLng) => {
+      map.setCenter(latLng);
 
-            clearMarkers();
-            const marker = new google.maps.Marker({
-              position: latLng,
-              map,
-            });
-            markers.push(marker);
-          }
-        }
-      });
+      if (streetViewElement) {
+        panorama = new google.maps.StreetViewPanorama(
+          streetViewElement,
+          {
+            showRoadLabels: false,
+            disableDefaultUI: true,
+            position: latLng,
+            pov: {
+              heading: 34,
+              pitch: 10,
+            },
+          },
+        );
+        map.setStreetView(panorama);
+      }
+
+      clearMarkers();
+      markers.push(new google.maps.Marker({
+        map,
+        position: latLng,
+      }));
     };
 
     const initMap = () => {
       const mapElement = document.getElementById('map');
+      streetViewElement = document.getElementById('pano');
 
       if (mapElement) {
         google = window.google;
-        geocoder = new google.maps.Geocoder();
         map = new google.maps.Map(mapElement, {
           center: { lat: latitude, lng: longitude },
           zoom: 13,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           disableDefaultUI: true,
         });
-        const streetViewElement = document.getElementById('pano');
-        let panorama: google.maps.StreetViewPanorama;
-        if (streetViewElement) {
-          panorama = new google.maps.StreetViewPanorama(
-            streetViewElement,
-            {
-              showRoadLabels: false,
-              disableDefaultUI: true,
-              position: {
-                lat: latitude,
-                lng: longitude,
-              },
-              pov: {
-                heading: 34,
-                pitch: 10,
-              },
-            },
-          );
-          map.setStreetView(panorama);
-        }
 
-        const defaultMarker = new google.maps.Marker({
-          position: { lat: latitude, lng: longitude },
-          map,
+        centerMap(new google.maps.LatLng(latitude, longitude));
+
+        map.addListener('click', (mapsMouseEvent: {latLng: google.maps.LatLng}) => {
+          centerMap(mapsMouseEvent.latLng);
         });
-        markers.push(defaultMarker);
 
-        /* input = document.getElementById('pac-input') as HTMLInputElement;
+        navigator.geolocation.getCurrentPosition((pos) => {
+          latitude = pos.coords.latitude;
+          longitude = pos.coords.longitude;
+          centerMap(new google.maps.LatLng(latitude, longitude));
+
+          /* input = document.getElementById('pac-input') as HTMLInputElement;
         if (input) {
           const searchBox = new google.maps.places.SearchBox(input);
           map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
@@ -123,43 +112,9 @@ export default defineComponent({
             }
           });
         } */
-
-        navigator.geolocation.getCurrentPosition((pos) => {
-          latitude = pos.coords.latitude;
-          longitude = pos.coords.longitude;
-
-          const hotspotLoc = {
-            lat: latitude,
-            lng: longitude,
-          };
-          map.setCenter(hotspotLoc);
-
-          if (streetViewElement) {
-            panorama = new google.maps.StreetViewPanorama(
-              streetViewElement,
-              {
-                showRoadLabels: false,
-                disableDefaultUI: true,
-                position: {
-                  lat: latitude,
-                  lng: longitude,
-                },
-                pov: {
-                  heading: 34,
-                  pitch: 10,
-                },
-              },
-            );
-            map.setStreetView(panorama);
-          }
-          markers.push(new google.maps.Marker({
-            map,
-            position: hotspotLoc,
-          }));
-
-          setTimeout(() => {
+          /* setTimeout(() => {
             getGeocode(new google.maps.LatLng(latitude, longitude));
-          }, 100);
+          }, 100); */
         }, () => { });
       }
     };
@@ -211,7 +166,7 @@ export default defineComponent({
     * element that contains the map. */
 
 #map {
-  height: 45%;
+  height: 50%;
   width: 100%;
 }
 #pano {
