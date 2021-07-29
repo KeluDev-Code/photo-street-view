@@ -9,12 +9,12 @@ const routes: Array<RouteRecordRaw> = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "GoogleMap" */ '../views/GoogleMap.vue'),
   },
-  {
-    // path: "*",
-    path: '/:catchAll(.*)',
-    name: 'NotFound',
-    component: () => import(/* webpackChunkName: "GoogleMap" */ '../views/GoogleMap.vue'),
-  },
+  // {
+  //  // path: "*",
+  //  path: '/:catchAll(.*)',
+  //  name: 'NotFound',
+  //  component: () => import(/* webpackChunkName: "GoogleMap" */ '../views/GoogleMap.vue'),
+  // },
 ];
 
 const router = createRouter({
