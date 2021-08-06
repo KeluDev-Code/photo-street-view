@@ -1,6 +1,6 @@
 <template>
   <div class="column" :class="{'fullPano': fullPano}" style="width: 100%; height: 100vh;"
-
+       @keyup.esc="changeFullStreet()"
        @mouseenter="changeHideGUI(false)" @mouseleave="changeHideGUI(true)"
   >
     <div class="row justify-center absolute-left" :class="{'hide': hideGUI}">
@@ -18,14 +18,14 @@
     </div>
     <div class="col relative">
       <div class="btn-absolute" :class="{'hide': hideGUI}">
-        <button class="icon icon-md" @click="changeFullStreet()">
+        <button id="changeFullStreet" class="icon icon-md" @click="changeFullStreet()">
           <svg width="24" height="22" viewbox="0 0 24 22" style="transform: scale(1.5);">
             <path fill="#ffffff" :d="fullPano ? mdiChevronDown : mdiChevronUp" />
           </svg>
         </button>
       </div>
       <!-- https://html2canvas.hertzen.com/ -->
-      <div id="pano" />
+      <div id="pano" tabindex="0" />
     </div>
   </div>
 </template>
@@ -232,6 +232,7 @@ export default defineComponent({
       fullPano.value = !fullPano.value;
       setTimeout(() => {
         google.maps.event.trigger(panorama, 'resize');
+        streetViewElement && streetViewElement.focus();
       }, 100);
     };
 
