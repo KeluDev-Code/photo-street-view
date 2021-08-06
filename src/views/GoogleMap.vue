@@ -1,6 +1,7 @@
 <template>
   <div class="column" :class="{'fullPano': fullPano}" style="width: 100%; height: 100vh;"
-       @keyup.esc="changeFullStreet()" @mouseenter="changeHideGUI(false)" @mouseleave="changeHideGUI(true)"
+
+       @mouseenter="changeHideGUI(false)" @mouseleave="changeHideGUI(true)"
   >
     <div class="row justify-center absolute-left" :class="{'hide': hideGUI}">
       <div class="row ma-sm">
@@ -18,7 +19,7 @@
     <div class="col relative">
       <div class="btn-absolute" :class="{'hide': hideGUI}">
         <button class="icon icon-md" @click="changeFullStreet()">
-          <svg width="24" height="24" viewbox="0 0 24 24" style="transform: scale(1.5);">
+          <svg width="24" height="22" viewbox="0 0 24 22" style="transform: scale(1.5);">
             <path fill="#ffffff" :d="fullPano ? mdiChevronDown : mdiChevronUp" />
           </svg>
         </button>
@@ -283,7 +284,7 @@ body {
 }
 
 #pano {
-  height: 100vh;
+  height: 100%;
   width: 100vw;
 }
 
@@ -331,8 +332,11 @@ body {
 
 .btn-absolute {
   position: absolute;
-  top: -12px;
-  left: 50%;
+  top: -22px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
   z-index: 10;
 }
 
@@ -372,6 +376,7 @@ body {
   border: 1px solid #00897B;
   border-radius: 4px;
 }
+
 .search-box:focus {
   outline: none !important;
   border: 1px solid #26A69A;
@@ -392,8 +397,8 @@ button.icon {
 }
 
 button.icon-md {
-  width: 45px;
-  height: 24px;
+  width: 48px;
+  height: 32px;
 }
 
 button.icon:hover {
@@ -403,6 +408,7 @@ button.icon:hover {
 button.icon:active {
   transform: scale(.88);
 }
+
 button.icon svg {
   padding: 0;
   margin: 0;
