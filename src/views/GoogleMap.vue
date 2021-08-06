@@ -1,15 +1,14 @@
 <template>
   <div class="column" :class="{'fullPano': fullPano}" style="width: 100%; height: 100vh;"
-       @keyup.esc="changeFullStreet()"
+       @keyup.esc="changeFullStreet()" @mouseenter="changeHideGUI(false)" @mouseleave="changeHideGUI(true)"
   >
-    <div class="row justify-center absolute-left">
-      <div class="ma-sm">
-        <input v-model="inputUrl" type="text" placeholder="Search Box" style="height: 17px" @keyup.enter="processURL()">
-        <button @click="processURL()">
-          &#128269;
-        </button>
-        <button @click="takeScreenShot()">
-          &#128248;
+    <div class="row justify-center absolute-left" :class="{'hide': hideGUI}">
+      <div class="row ma-sm">
+        <input v-model="inputUrl" type="text" placeholder="Search Box" class="search-box" @keyup.enter="processURL()">
+        <button class="icon" @click="processURL()">
+          <svg width="24" height="24" viewbox="0 0 24 24">
+            <path fill="#ffffff" :d="mdiMagnify" />
+          </svg>
         </button>
       </div>
     </div>
@@ -17,13 +16,15 @@
       <div id="map" />
     </div>
     <div class="col relative">
-      <div class="btn-absolute">
-        <button style="font-weight: bold; font-size: 16px;" @click="changeFullStreet()">
-          {{ fullPano ? '&#709;' : '&#708;' }}
+      <div class="btn-absolute" :class="{'hide': hideGUI}">
+        <button class="icon icon-md" @click="changeFullStreet()">
+          <svg width="24" height="24" viewbox="0 0 24 24" style="transform: scale(1.5);">
+            <path fill="#ffffff" :d="fullPano ? mdiChevronDown : mdiChevronUp" />
+          </svg>
         </button>
       </div>
-      <div id="pano" />
       <!-- https://html2canvas.hertzen.com/ -->
+      <div id="pano" />
     </div>
   </div>
 </template>
@@ -32,17 +33,16 @@
 import {
   defineComponent, onUnmounted, onMounted, ref,
 } from 'vue';
-import html2canvas from 'html2canvas';
+import { mdiMagnify, mdiChevronUp, mdiChevronDown } from '@mdi/js';
 
 declare global {
     interface Window { initAutocomplete: ()=> void }
 }
 export default defineComponent({
   name: 'GoogleMap',
-  props: {
-  },
   setup() {
     const fullPano = ref(false);
+    const hideGUI = ref(false);
     const inputUrl = ref('');
     if (!('geolocation' in navigator)) {
       // errorStr = 'Geolocation is not available.';
@@ -151,21 +151,28 @@ export default defineComponent({
       }
     };
 
-    const changeFullStreet = () => {
-      fullPano.value = !fullPano.value;
-      setTimeout(() => {
-        google.maps.event.trigger(panorama, 'resize');
-      }, 100);
-    };
     // https://www.aspsnippets.com/Articles/Take-Screenshot-Snapshot-of-Google-Maps-using-JavaScript.aspx
-    const takeScreenShot = () => {
-      // const canvaStreeView = document.getElementsByClassName('widget-scene-canvas');
+    /* const takeScreenShot = () => {
+      // const [canvaStreeView] = document.getElementsByClassName('widget-scene-canvas');
       const canvaStreeView = document.getElementById('pano');
       if (canvaStreeView) {
+        /* let img = (canvaStreeView as HTMLCanvasElement).toDataURL('image/png');
+        img = img.replace('data:image/png;base64,', '');
+        const finalImageSrc = `data:image/png;base64,${img}`;
+        const link = document.createElement('img');
+
+        link.src = finalImageSrc;
+        document.body.appendChild(link); *
         html2canvas(canvaStreeView, {
           useCORS: true,
         }).then((canvas) => {
-          const link = document.createElement('a');
+          const img = canvas.toDataURL().replace('data:image/png;base64,', '');
+          const finalImageSrc = `data:image/png;base64,${img}`;
+          const link = document.createElement('img');
+
+          link.src = finalImageSrc;
+          document.body.appendChild(link);
+          /* const link = document.createElement('a');
 
           if (typeof link.download === 'string') {
             link.href = canvas.toDataURL();
@@ -181,60 +188,10 @@ export default defineComponent({
             document.body.removeChild(link);
           } else {
             window.open(canvas.toDataURL());
-          }
+          } *
         });
-        /* const newCanvas = document.createElement('canvas');
-        newCanvas.id = 'screenShot';
-        const context = newCanvas.getContext('2d');
-
-        // set dimensions
-        newCanvas.width = (canvaStreeView[0] as HTMLCanvasElement).width;
-        newCanvas.height = (canvaStreeView[0] as HTMLCanvasElement).height;
-
-        // apply the old canvas to the new one
-        context!.drawImage(canvaStreeView[0] as HTMLCanvasElement, 0, 0);
-        // const canvas = canvaStreeView[0].cloneNode(true);
-        // console.log(canvas);
-        // (canvas as Element).className = '';
-
-        document.body.appendChild(newCanvas);
-        /// html2canvas(body[0]).then((canvas) => {
-        /* (canvaStreeView[0] as HTMLCanvasElement).toBlob((blob) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const file: any = blob;
-            file.lastModifiedDate = new Date();
-            file.name = 'Capture';
-          }); *
-        const fileName = 'Capture';
-        const blob = (newCanvas as HTMLCanvasElement).toDataURL();
-        if (blob) {
-          try {
-            if (window.navigator.msSaveOrOpenBlob) {
-              window.navigator.msSaveOrOpenBlob(blob, `${fileName}`);
-            } else {
-              const downloadUrl = blob;
-              const link = window.document.createElement('a');
-              // safari doesn't support this yet
-              if (typeof link.download === 'undefined') {
-                window.location.href = downloadUrl;
-              } else {
-                link.href = downloadUrl;
-                link.setAttribute('download', `${fileName}.png`);
-                window.document.body.appendChild(link);
-                link.click();
-              }
-
-              try {
-                setTimeout(() => { window.document.body.removeChild(link); }, 200);
-                // eslint-disable-next-line no-empty
-              } catch (err) { }
-            }
-            // eslint-disable-next-line no-empty
-          } catch (ex) { }
-        } */
-        // });
       }
-    };
+    }; */
 
     window.initAutocomplete = () => {
       initMap();
@@ -266,17 +223,34 @@ export default defineComponent({
         document.querySelectorAll('.pac-container').forEach((a) => {
           a.remove();
         });
-
         // eslint-disable-next-line no-empty
       } catch (err) { }
     });
+
+    const changeFullStreet = () => {
+      fullPano.value = !fullPano.value;
+      setTimeout(() => {
+        google.maps.event.trigger(panorama, 'resize');
+      }, 100);
+    };
+
+    const changeHideGUI = (hide: boolean) => {
+      if (fullPano.value) {
+        hideGUI.value = hide;
+      }
+    };
 
     return {
       inputUrl,
       processURL,
       fullPano,
       changeFullStreet,
-      takeScreenShot,
+      changeHideGUI,
+      hideGUI,
+
+      mdiMagnify,
+      mdiChevronUp,
+      mdiChevronDown,
     };
   },
 });
@@ -289,8 +263,18 @@ export default defineComponent({
 html,
 body {
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
+}
+@media print {
+  img {
+    max-width: 100% !important;
+    }
+  #pano {
+    height: 200px !important;
+    width: 200px !important;
+  }
 }
 
 #map {
@@ -299,8 +283,8 @@ body {
 }
 
 #pano {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
 }
 
 .column,
@@ -379,6 +363,49 @@ body {
 
 .hide {
   display: none;
+}
+
+.search-box {
+  padding: 1px 2px;
+  margin: 8px 0;
+  height: 28px;
+  border: 1px solid #00897B;
+  border-radius: 4px;
+}
+.search-box:focus {
+  outline: none !important;
+  border: 1px solid #26A69A;
+  box-shadow: 0 0 10px #26A69A;
+}
+
+button.icon {
+  padding: 0;
+  margin: 8px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #004D40;
+  border-radius: 4px;
+  background-color: #00897B;
+  text-align: center;
+  transition: all .3s;
+  cursor: pointer;
+}
+
+button.icon-md {
+  width: 45px;
+  height: 24px;
+}
+
+button.icon:hover {
+  background-color: #26A69A;
+}
+
+button.icon:active {
+  transform: scale(.88);
+}
+button.icon svg {
+  padding: 0;
+  margin: 0;
 }
 
 </style>
